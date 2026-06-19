@@ -89,6 +89,122 @@
     if (c) { c.innerHTML = ''; buildPrayerFlags(); }
   });
 
+  /* ── Prayer flags strip — illustrated SVG rectangular flags on a wavy rope */
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  function buildFlagStrip() {
+    const svg = $('#flag-strip-svg');
+    if (!svg) return;
+    // panchabarna: blue, white, red, green, yellow
+    const colors = ['#2a72c4', '#f4f6f7', '#d6354a', '#2fa84f', '#f2c037'];
+    const W = 1200, H = 130;
+    const span = 44;               // horizontal gap between flags
+    const count = Math.ceil(W / span) + 1;
+    svg.innerHTML = '';
+
+    // Wavy rope path (gentle sag)
+    const ropeY = function (x) { return 30 + 14 * Math.sin((x / W) * Math.PI * 3); };
+    let d = 'M0,' + ropeY(0);
+    for (let x = 0; x <= W; x += 20) d += ' L' + x + ',' + ropeY(x).toFixed(1);
+    const rope = document.createElementNS(SVGNS, 'path');
+    rope.setAttribute('d', d);
+    rope.setAttribute('fill', 'none');
+    rope.setAttribute('stroke', '#2b2b2b');
+    rope.setAttribute('stroke-width', '1.6');
+    svg.appendChild(rope);
+
+    // Hanging rectangular flags — outer <g> positions, inner <g> waves
+    for (let i = 0; i < count; i++) {
+      const x = i * span + 8;
+      const y = ropeY(x);
+      const pos = document.createElementNS(SVGNS, 'g');
+      pos.setAttribute('transform', 'translate(' + x + ',' + y + ')');
+
+      const wave = document.createElementNS(SVGNS, 'g');
+      wave.style.transformBox = 'fill-box';
+      wave.style.transformOrigin = 'center top';
+      wave.style.animation = 'flagWave ' + (2.6 + (i % 5) * 0.35) + 's ease-in-out infinite';
+      wave.style.animationDelay = (i * 0.07) + 's';
+
+      const rect = document.createElementNS(SVGNS, 'rect');
+      rect.setAttribute('x', '0');
+      rect.setAttribute('y', '0');
+      rect.setAttribute('width', '30');
+      rect.setAttribute('height', '40');
+      rect.setAttribute('rx', '2');
+      rect.setAttribute('fill', colors[i % 5]);
+      rect.setAttribute('stroke', 'rgba(0,0,0,.12)');
+      rect.setAttribute('stroke-width', '0.6');
+      wave.appendChild(rect);
+
+      // wind-horse / motif hint: a ring + text lines
+      const ring = document.createElementNS(SVGNS, 'circle');
+      ring.setAttribute('cx', '15'); ring.setAttribute('cy', '15'); ring.setAttribute('r', '7');
+      ring.setAttribute('fill', 'none');
+      ring.setAttribute('stroke', (i % 5 === 1) ? 'rgba(0,0,0,.35)' : 'rgba(255,255,255,.65)');
+      ring.setAttribute('stroke-width', '1');
+      wave.appendChild(ring);
+      for (let l = 0; l < 3; l++) {
+        const ln = document.createElementNS(SVGNS, 'line');
+        ln.setAttribute('x1', '5'); ln.setAttribute('x2', '25');
+        ln.setAttribute('y1', 27 + l * 4); ln.setAttribute('y2', 27 + l * 4);
+        ln.setAttribute('stroke', (i % 5 === 1) ? 'rgba(0,0,0,.25)' : 'rgba(255,255,255,.5)');
+        ln.setAttribute('stroke-width', '0.8');
+        wave.appendChild(ln);
+      }
+      pos.appendChild(wave);
+      svg.appendChild(pos);
+    }
+  }
+  buildFlagStrip();
+
+  /* ── Mandala watermark (testimonials) — radial line-art lotus ── */
+  function buildMandala() {
+    const svg = $('#testi-mandala');
+    if (!svg) return;
+    svg.innerHTML = '';
+    const cx = 120, cy = 120;
+    const stroke = '#008B8B';
+
+    function petalRing(count, rInner, rOuter, w) {
+      for (let i = 0; i < count; i++) {
+        const ang = (360 / count) * i;
+        const p = document.createElementNS(SVGNS, 'path');
+        // a pointed lotus petal centered on the +y axis, then rotated
+        p.setAttribute('d',
+          'M' + cx + ',' + (cy - rInner) +
+          ' C' + (cx - w) + ',' + (cy - (rInner + rOuter) / 2) +
+          ' ' + (cx - w) + ',' + (cy - rOuter + 6) +
+          ' ' + cx + ',' + (cy - rOuter) +
+          ' C' + (cx + w) + ',' + (cy - rOuter + 6) +
+          ' ' + (cx + w) + ',' + (cy - (rInner + rOuter) / 2) +
+          ' ' + cx + ',' + (cy - rInner) + ' Z');
+        p.setAttribute('fill', 'none');
+        p.setAttribute('stroke', stroke);
+        p.setAttribute('stroke-width', '1.4');
+        p.setAttribute('transform', 'rotate(' + ang + ' ' + cx + ' ' + cy + ')');
+        svg.appendChild(p);
+      }
+    }
+    // concentric rings of petals
+    petalRing(16, 96, 116, 12);
+    petalRing(12, 66, 96, 13);
+    petalRing(12, 40, 66, 11);
+    petalRing(8, 16, 40, 9);
+    // concentric circles
+    [112, 96, 64, 38, 14].forEach(function (r) {
+      const c = document.createElementNS(SVGNS, 'circle');
+      c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', r);
+      c.setAttribute('fill', 'none'); c.setAttribute('stroke', stroke); c.setAttribute('stroke-width', '1');
+      svg.appendChild(c);
+    });
+    // center dot
+    const dot = document.createElementNS(SVGNS, 'circle');
+    dot.setAttribute('cx', cx); dot.setAttribute('cy', cy); dot.setAttribute('r', '5');
+    dot.setAttribute('fill', stroke);
+    svg.appendChild(dot);
+  }
+  buildMandala();
+
   /* ── Canvas Particles ───────────────────────────────────── */
   (function initParticles() {
     const canvas = $('#particles-canvas');

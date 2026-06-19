@@ -27,6 +27,33 @@ a { text-decoration: none; }
 img { display: block; }
 
 /* ── Keyframes ───────────────────────────────────────────── */
+/* Ken Burns — slow zoom + drift on hero photo */
+@keyframes kenBurns {
+  0%   { transform: scale(1)    translate(0%,    0%); }
+  25%  { transform: scale(1.07) translate(-1%,  -0.8%); }
+  50%  { transform: scale(1.12) translate(0.6%, -0.5%); }
+  75%  { transform: scale(1.08) translate(1%,    0.6%); }
+  100% { transform: scale(1)    translate(0%,    0%); }
+}
+/* Slow pan for prayer flags strip */
+@keyframes flagPan {
+  0%   { background-position: 0% center; }
+  100% { background-position: 100% center; }
+}
+/* Sketch stroke-draw for SVG overlay on dharahara */
+@keyframes drawStroke {
+  from { stroke-dashoffset: 2000; opacity: 0; }
+  to   { stroke-dashoffset: 0;    opacity: 1; }
+}
+@keyframes sketchPop {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+/* Mandala slow spin */
+@keyframes mandalaRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
 @keyframes heroGradient {
   0%,100% { background-position: 0% 50%; }
   50%      { background-position: 100% 50%; }
@@ -160,9 +187,9 @@ img { display: block; }
   background: transparent;
 }
 #navbar.scrolled {
-  background: rgba(0,59,59,.94);
+  background: linear-gradient(110deg, rgba(0,122,122,.95) 0%, rgba(0,100,100,.96) 100%);
   backdrop-filter: blur(12px);
-  box-shadow: 0 2px 20px rgba(0,0,0,.25);
+  box-shadow: 0 2px 18px rgba(0,80,80,.28);
 }
 
 .nav-link {
@@ -235,13 +262,41 @@ img { display: block; }
   align-items: center;
 }
 
+/* Real Mount Everest photo — Ken Burns zoom */
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #003B3B 0%, #005050 35%, #007070 65%, #003B3B 100%);
-  background-size: 300% 300%;
-  animation: heroGradient 12s ease infinite;
   z-index: 0;
+  overflow: hidden;
+}
+/* Real Mount Everest photo — ~90% natural, slow Ken Burns zoom */
+.hero-bg-photo {
+  position: absolute;
+  inset: -5%;
+  background-image: url('../images/mount-everest.jpg');
+  background-size: cover;
+  background-position: center 32%;
+  /* keep it natural — only a touch of depth; slightly darker so white text pops */
+  filter: saturate(1.06) contrast(1.06) brightness(0.9);
+  animation: kenBurns 30s ease-in-out infinite alternate;
+  will-change: transform;
+}
+/* Overlay: darker behind the left-side copy, clear over the peak */
+.hero-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(100deg,
+      rgba(2,20,26,0.88) 0%,
+      rgba(2,24,30,0.66) 28%,
+      rgba(2,28,34,0.26) 56%,
+      rgba(2,32,38,0.08) 80%,
+      rgba(2,32,38,0.02) 100%),
+    linear-gradient(180deg,
+      rgba(0,18,24,0.34) 0%,
+      rgba(0,18,24,0) 32%,
+      rgba(0,16,20,0) 68%,
+      rgba(0,14,18,0.42) 100%);
 }
 
 #particles-canvas {
@@ -287,16 +342,42 @@ img { display: block; }
 .prayer-flag:nth-child(5n+4) { background: #1a6b1a; animation: flagWave 2.2s ease-in-out infinite .36s; }
 .prayer-flag:nth-child(5n+5) { background: #D4A017; animation: flagWave 2.2s ease-in-out infinite .48s; }
 
-/* Mountains */
-.mountains-wrap {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  z-index: 2;
+/* Illustrated range hidden — real Everest photo is the hero background now */
+.mountains-wrap { display: none; }
+.everest-svg { display: block; width: 100%; height: 100%; }
+
+/* Sun glow pulse */
+.ev-sun-glow { animation: evSunPulse 6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ev-sun      { animation: evSunPulse 6s ease-in-out infinite .3s; transform-box: fill-box; transform-origin: center; }
+@keyframes evSunPulse {
+  0%,100% { opacity: .85; transform: scale(1); }
+  50%     { opacity: 1;   transform: scale(1.06); }
 }
-.mountains-svg { display: block; }
-.mt-back  { fill: #003030; opacity: .65; animation: mountainDrift 18s ease-in-out infinite; }
-.mt-mid   { fill: #005050; opacity: .85; animation: mountainDrift 22s ease-in-out infinite reverse; }
-.mt-front { fill: #007474; }
+
+/* Atmospheric haze gentle breathe */
+.ev-haze { animation: evHazeBreathe 14s ease-in-out infinite; }
+@keyframes evHazeBreathe {
+  0%,100% { opacity: 1; }
+  50%     { opacity: .82; }
+}
+
+/* Snow couloirs subtle shimmer */
+.ev-streaks { animation: evShimmer 5s ease-in-out infinite; }
+@keyframes evShimmer {
+  0%,100% { opacity: .5; }
+  50%     { opacity: .85; }
+}
+
+/* Everest summit plume drifts and fades */
+.ev-plume {
+  transform-box: fill-box;
+  transform-origin: right center;
+  animation: evPlumeDrift 7s ease-in-out infinite;
+}
+@keyframes evPlumeDrift {
+  0%,100% { opacity: .55; transform: translateX(0) scaleX(1); }
+  50%     { opacity: .85; transform: translateX(-14px) scaleX(1.12); }
+}
 
 /* Hero copy */
 .hero-copy { position: relative; z-index: 10; }
@@ -419,14 +500,26 @@ img { display: block; }
 .trust-lbl { font-size: .7rem; color: rgba(200,240,240,.7); }
 .trust-sep { width: 1px; height: 36px; background: rgba(255,255,255,.2); }
 
-/* Dharahara */
-.dharahara-silhouette {
+/* Dharahara tower — illustrated SVG, stands behind the dashboard card */
+.dharahara-illus {
   position: absolute;
-  right: 24px;
-  bottom: 0;
-  opacity: 0.15;
-  animation: fadeIn 1.5s ease .8s both;
+  right: 0;
+  bottom: -30px;
+  z-index: 1;
+  filter: drop-shadow(0 12px 28px rgba(0,0,0,.3));
+  animation: fadeInUp 1.2s var(--ease) .5s both;
 }
+.dharahara-illus svg { display: block; }
+/* gold finial glint */
+.dh-glint {
+  animation: dhGlint 3.2s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes dhGlint {
+  0%,100% { opacity: .5; r: 3.2px; }
+  50%     { opacity: 1;  r: 4.4px; }
+}
+.dh-spire { animation: fadeIn 1s ease 1.4s both; }
 
 /* Dashboard card */
 .dash-card {
@@ -559,12 +652,53 @@ img { display: block; }
 /* ═══════════════════════════════════════════════
    ABOUT
 ════════════════════════════════════════════════ */
-.about-visual { position: relative; min-height: 320px; }
-.stupa-ring {
+.about-visual { position: relative; min-height: 360px; }
+
+/* ── Boudhanath stupa — bold illustration ── */
+.stupa-illus-wrap {
   position: relative;
-  z-index: 2;
-  filter: drop-shadow(0 10px 30px rgba(0,139,139,.15));
+  width: 340px;
+  max-width: 100%;
+  filter: drop-shadow(0 18px 44px rgba(0,139,139,.22));
+  animation: fadeInUp 1s var(--ease) both;
 }
+.stupa-illus { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* Buddha eyes gentle blink-glow */
+.st-eyes  { animation: stEyeGlow 4s ease-in-out infinite; }
+@keyframes stEyeGlow {
+  0%,100% { opacity: 1; }
+  50%     { opacity: .82; }
+}
+/* Pinnacle jewel sparkle */
+.st-jewel { animation: dhGlint 3s ease-in-out infinite; transform-origin: center; }
+
+/* Prayer flag streamers sway */
+.st-flags-l { transform-origin: 160px 40px; animation: stSwayL 5s ease-in-out infinite; }
+.st-flags-r { transform-origin: 160px 40px; animation: stSwayR 5s ease-in-out infinite; }
+@keyframes stSwayL {
+  0%,100% { transform: rotate(0deg); }
+  50%     { transform: rotate(-1.6deg); }
+}
+@keyframes stSwayR {
+  0%,100% { transform: rotate(0deg); }
+  50%     { transform: rotate(1.6deg); }
+}
+/* each flag pops in on reveal */
+.stupa-illus .st-flags-l rect,
+.stupa-illus .st-flags-r rect {
+  animation: sketchPop .5s ease both;
+}
+.stupa-illus .st-flags-l rect:nth-child(1),
+.stupa-illus .st-flags-r rect:nth-child(1) { animation-delay: .5s; }
+.stupa-illus .st-flags-l rect:nth-child(2),
+.stupa-illus .st-flags-r rect:nth-child(2) { animation-delay: .65s; }
+.stupa-illus .st-flags-l rect:nth-child(3),
+.stupa-illus .st-flags-r rect:nth-child(3) { animation-delay: .8s; }
+.stupa-illus .st-flags-l rect:nth-child(4),
+.stupa-illus .st-flags-r rect:nth-child(4) { animation-delay: .95s; }
+.stupa-illus .st-flags-l rect:nth-child(5),
+.stupa-illus .st-flags-r rect:nth-child(5) { animation-delay: 1.1s; }
 
 .about-badge {
   position: absolute;
@@ -592,6 +726,44 @@ img { display: block; }
   padding: 6px 14px;
   border-radius: 50px;
   border: 1px solid var(--ep-100);
+}
+
+/* ═══════════════════════════════════════════════
+   PRAYER FLAGS STRIP — cultural divider
+════════════════════════════════════════════════ */
+.flags-strip {
+  position: relative;
+  height: 150px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #e7f6f6 0%, #ffffff 100%);
+  border-top: 1px solid #d8efef;
+  border-bottom: 1px solid #d8efef;
+}
+/* Illustrated flags SVG fills the strip */
+.flags-strip-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* Label text */
+.flags-strip-label {
+  position: relative;
+  z-index: 4;
+  margin-top: 70px;
+  color: var(--ep-700);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  background: rgba(255,255,255,0.82);
+  padding: 6px 20px;
+  border-radius: 50px;
+  border: 1px solid var(--ep-100);
+  pointer-events: none;
 }
 
 /* ═══════════════════════════════════════════════
@@ -842,19 +1014,28 @@ img { display: block; }
   color: #555;
 }
 .pf-row span:first-child { width: 100px; flex-shrink: 0; font-weight: 600; }
-.pf-bar {
+/* Track = full remaining width; fill = only var(--pw) of it */
+.pf-track {
+  flex: 1;
   height: 22px;
-  background: var(--ep-500);
+  background: rgba(0,139,139,.1);
   border-radius: 5px;
-  width: var(--pw);
+  overflow: hidden;
+}
+.pf-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ep-600), var(--ep-400));
+  border-radius: 5px;
+  width: var(--pw);   /* e.g. 69% of the TRACK, not the whole row */
   display: flex;
   align-items: center;
   justify-content: flex-end;
   padding-right: 8px;
   color: #fff;
-  font-size: .7rem;
+  font-size: .68rem;
   font-weight: 700;
   transition: width 1s var(--ease);
+  min-width: 28px;
 }
 
 .prev-hierarchy { width: 100%; max-width: 300px; }
@@ -1044,22 +1225,28 @@ img { display: block; }
   font-size: .75rem;
 }
 .fd-wf-lbl { width: 120px; flex-shrink: 0; color: #555; font-weight: 500; }
-.fd-wf-b {
+/* Track fills remaining width; fill bar respects --fw % */
+.fd-wf-track {
+  flex: 1;
   height: 24px;
-  background: var(--ep-500);
+  background: rgba(0,139,139,.1);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.fd-wf-b {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ep-700), var(--ep-400));
   border-radius: 5px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding-right: 8px;
+  padding-left: 8px;
   color: #fff;
   font-size: .68rem;
   font-weight: 700;
-  width: 0;
+  width: 0;           /* animated by JS to var(--fw) of the TRACK */
   transition: width 1.2s var(--ease);
-  min-width: 24px;
-  flex: 1;
-  max-width: calc(var(--fw) - 0px);
+  overflow: hidden;
+  white-space: nowrap;
 }
 .fd-wf-pct { font-size: .72rem; font-weight: 700; color: var(--ep-600); width: 38px; text-align: right; flex-shrink: 0; }
 
@@ -1074,21 +1261,44 @@ img { display: block; }
   color: #444;
 }
 .fd-inv-row span:first-child { width: 175px; flex-shrink: 0; }
-.fd-inv-b {
+/* Track takes remaining row width; fill respects --iw % */
+.fd-inv-track {
   flex: 1;
   height: 16px;
-  background: var(--ep-500);
+  background: rgba(0,139,139,.1);
   border-radius: 4px;
-  width: 0;
+  overflow: hidden;
+}
+.fd-inv-b {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ep-600), var(--ep-400));
+  border-radius: 4px;
+  width: 0;           /* animated to var(--iw) % of the TRACK */
   transition: width 1.2s var(--ease);
-  max-width: var(--iw);
 }
 .fd-inv-n { width: 30px; text-align: right; font-weight: 700; color: #333; flex-shrink: 0; }
 
 /* ═══════════════════════════════════════════════
    TESTIMONIALS
 ════════════════════════════════════════════════ */
-.testi-bg { background: linear-gradient(135deg, #f0fafa, #e8f7f7); }
+/* Testimonials — illustrated mandala watermark background */
+.testi-bg {
+  position: relative;
+  background: linear-gradient(135deg, #eefafa, #f6fdfd);
+  overflow: hidden;
+}
+.testi-mandala {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 720px; height: 720px;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  animation: mandalaRotate 90s linear infinite;
+  opacity: 0.10;
+  z-index: 0;
+  pointer-events: none;
+}
+.testi-bg > .max-w-7xl { position: relative; z-index: 1; }
 
 .testi-card {
   background: #fff;
@@ -1200,17 +1410,36 @@ img { display: block; }
 /* ═══════════════════════════════════════════════
    CONTACT
 ════════════════════════════════════════════════ */
+/* Contact — moody dark teal with illustrated mountain silhouette */
 .contact-section {
-  background: linear-gradient(135deg, var(--ep-800) 0%, var(--ep-700) 50%, var(--ep-900) 100%);
   position: relative;
   overflow: hidden;
+  background: linear-gradient(160deg, #023238 0%, #044a4f 45%, #012528 100%);
 }
+/* Illustrated mountain range silhouette anchored to the bottom (inline SVG) */
 .contact-section::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  left: 0; right: 0; bottom: 0;
+  height: 46%;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 340' preserveAspectRatio='xMidYMax slice'%3E%3Cpath fill='%23021c1f' d='M0,340 L0,210 L120,120 L210,170 L320,70 L430,150 L520,90 L640,180 L720,60 L820,160 L930,100 L1040,180 L1140,90 L1260,170 L1360,110 L1440,160 L1440,340Z'/%3E%3Cpath fill='%23063b40' opacity='0.7' d='M0,340 L0,250 L130,190 L250,240 L360,170 L480,235 L600,180 L720,240 L840,175 L960,235 L1080,185 L1200,240 L1320,190 L1440,235 L1440,340Z'/%3E%3Cg fill='%23ffffff' opacity='0.85'%3E%3Cpath d='M720,60 L700,95 L740,95Z'/%3E%3Cpath d='M320,70 L305,100 L335,100Z'/%3E%3C/g%3E%3C/svg%3E") no-repeat bottom center;
+  background-size: cover;
+  z-index: 0;
 }
+/* subtle star/snow dots via radial gradients on top */
+.contact-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1.5px 1.5px at 18% 22%, rgba(255,255,255,.5), transparent),
+    radial-gradient(1.5px 1.5px at 72% 16%, rgba(255,255,255,.4), transparent),
+    radial-gradient(1.5px 1.5px at 45% 30%, rgba(255,255,255,.35), transparent),
+    radial-gradient(1.5px 1.5px at 88% 40%, rgba(255,255,255,.3), transparent);
+  z-index: 1;
+}
+/* Push all content above the pseudo-element overlays */
+.contact-section > * { position: relative; z-index: 2; }
 
 .contact-items { display: flex; flex-direction: column; gap: 18px; }
 .contact-item { display: flex; align-items: flex-start; gap: 14px; }
@@ -1300,8 +1529,44 @@ img { display: block; }
    FOOTER
 ════════════════════════════════════════════════ */
 .site-footer {
-  background: #0a1818;
-  color: #aaa;
+  background: linear-gradient(135deg, var(--ep-700) 0%, var(--ep-800) 100%);
+  color: rgba(224,247,247,.85);
+}
+
+/* Footer logo — colorful logo on a raised white 3D card */
+.footer-logo-card {
+  display: inline-block;
+  background: linear-gradient(145deg, #ffffff 0%, #eef7f7 100%);
+  border-radius: 20px;
+  padding: 22px 30px;
+  box-shadow:
+    0 22px 48px rgba(0,0,0,.38),
+    0 6px 14px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.9),
+    inset 0 -2px 6px rgba(0,80,80,.10);
+  transform: perspective(700px) rotateX(0deg);
+  transition: transform .4s var(--ease), box-shadow .4s var(--ease);
+  animation: footerLogoFloat 5s ease-in-out infinite;
+}
+.footer-logo-card:hover {
+  transform: perspective(700px) translateY(-5px) rotateX(5deg) scale(1.02);
+  box-shadow:
+    0 32px 64px rgba(0,0,0,.45),
+    0 10px 20px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+.footer-logo-img {
+  height: 100px;
+  width: auto;
+  display: block;
+}
+@keyframes footerLogoFloat {
+  0%,100% { transform: perspective(700px) translateY(0)    rotateX(0deg); }
+  50%     { transform: perspective(700px) translateY(-7px) rotateX(3deg); }
+}
+@media (max-width: 640px) {
+  .footer-logo-img { height: 100px; }
+  .footer-logo-card { padding: 18px 22px; }
 }
 
 .footer-divider {
@@ -1309,23 +1574,23 @@ img { display: block; }
   align-items: center;
   gap: 16px;
   padding: 0;
-  border-top: 1px solid #1a3030;
+  border-top: 1px solid rgba(255,255,255,.18);
 }
 .footer-divider::before,
 .footer-divider::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: #1a3030;
+  background: rgba(255,255,255,.18);
 }
 
 .footer-lnk {
   display: block;
   font-size: .82rem;
-  color: #5a7070;
+  color: rgba(214,240,240,.82);
   transition: color .2s;
 }
-.footer-lnk:hover { color: var(--ep-400); }
+.footer-lnk:hover { color: #ffffff; }
 
 .footer-cta-btn {
   display: inline-block;
@@ -1349,7 +1614,7 @@ img { display: block; }
   flex-wrap: wrap;
   gap: 8px;
   padding: 16px 0 8px;
-  border-top: 1px solid #1a3030;
+  border-top: 1px solid rgba(255,255,255,.15);
 }
 
 /* ═══════════════════════════════════════════════
